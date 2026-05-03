@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-05-02T22:47:54-0300",
+    date = "2026-05-02T22:59:57-0300",
     comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.46.0.v20260407-0427, environment: Java 21.0.10 (Eclipse Adoptium)"
 )
 @Component
@@ -40,35 +40,35 @@ public class FoodMapperImpl implements FoodMapper {
         if ( entity.getVerified() != null ) {
             food.verified( entity.getVerified() );
         }
-        food.id( entity.getId() );
-        food.name( entity.getName() );
-        food.brand( entity.getBrand() );
-        food.barcode( entity.getBarcode() );
-        food.externalId( entity.getExternalId() );
-        food.energyKcal( entity.getEnergyKcal() );
-        food.energyKj( entity.getEnergyKj() );
-        food.carbohydratesG( entity.getCarbohydratesG() );
-        food.ofWhichSugarsG( entity.getOfWhichSugarsG() );
-        food.ofWhichFiberG( entity.getOfWhichFiberG() );
-        food.proteinsG( entity.getProteinsG() );
-        food.fatTotalG( entity.getFatTotalG() );
-        food.ofWhichSaturatedG( entity.getOfWhichSaturatedG() );
-        food.ofWhichTransG( entity.getOfWhichTransG() );
-        food.sodiumMg( entity.getSodiumMg() );
-        Map<String, BigDecimal> map = entity.getMicronutrients();
-        if ( map != null ) {
-            food.micronutrients( new LinkedHashMap<String, BigDecimal>( map ) );
-        }
-        food.ingredientsText( entity.getIngredientsText() );
         String[] allergens = entity.getAllergens();
         if ( allergens != null ) {
             food.allergens( Arrays.copyOf( allergens, allergens.length ) );
         }
-        food.servingSizeG( entity.getServingSizeG() );
-        food.servingDescription( entity.getServingDescription() );
+        food.barcode( entity.getBarcode() );
+        food.brand( entity.getBrand() );
+        food.carbohydratesG( entity.getCarbohydratesG() );
+        food.energyKcal( entity.getEnergyKcal() );
+        food.energyKj( entity.getEnergyKj() );
+        food.externalId( entity.getExternalId() );
+        food.fatTotalG( entity.getFatTotalG() );
+        food.id( entity.getId() );
         food.imageUrl( entity.getImageUrl() );
-        food.tenantId( entity.getTenantId() );
+        food.ingredientsText( entity.getIngredientsText() );
         food.measures( toDomainMeasures( entity.getMeasures() ) );
+        Map<String, BigDecimal> map = entity.getMicronutrients();
+        if ( map != null ) {
+            food.micronutrients( new LinkedHashMap<String, BigDecimal>( map ) );
+        }
+        food.name( entity.getName() );
+        food.ofWhichFiberG( entity.getOfWhichFiberG() );
+        food.ofWhichSaturatedG( entity.getOfWhichSaturatedG() );
+        food.ofWhichSugarsG( entity.getOfWhichSugarsG() );
+        food.ofWhichTransG( entity.getOfWhichTransG() );
+        food.proteinsG( entity.getProteinsG() );
+        food.servingDescription( entity.getServingDescription() );
+        food.servingSizeG( entity.getServingSizeG() );
+        food.sodiumMg( entity.getSodiumMg() );
+        food.tenantId( entity.getTenantId() );
 
         food.source( Food.FoodSource.valueOf(entity.getSource().name()) );
         food.category( entity.getCategory() != null ? Food.FoodCategory.valueOf(entity.getCategory().name()) : null );
@@ -117,36 +117,36 @@ public class FoodMapperImpl implements FoodMapper {
 
         FoodEntity.FoodEntityBuilder foodEntity = FoodEntity.builder();
 
-        foodEntity.id( food.getId() );
-        foodEntity.name( food.getName() );
-        foodEntity.brand( food.getBrand() );
-        foodEntity.barcode( food.getBarcode() );
-        foodEntity.externalId( food.getExternalId() );
-        foodEntity.energyKcal( food.getEnergyKcal() );
-        foodEntity.energyKj( food.getEnergyKj() );
-        foodEntity.carbohydratesG( food.getCarbohydratesG() );
-        foodEntity.ofWhichSugarsG( food.getOfWhichSugarsG() );
-        foodEntity.ofWhichFiberG( food.getOfWhichFiberG() );
-        foodEntity.proteinsG( food.getProteinsG() );
-        foodEntity.fatTotalG( food.getFatTotalG() );
-        foodEntity.ofWhichSaturatedG( food.getOfWhichSaturatedG() );
-        foodEntity.ofWhichTransG( food.getOfWhichTransG() );
-        foodEntity.sodiumMg( food.getSodiumMg() );
-        Map<String, BigDecimal> map = food.getMicronutrients();
-        if ( map != null ) {
-            foodEntity.micronutrients( new LinkedHashMap<String, BigDecimal>( map ) );
-        }
-        foodEntity.ingredientsText( food.getIngredientsText() );
+        foodEntity.active( food.isActive() );
         String[] allergens = food.getAllergens();
         if ( allergens != null ) {
             foodEntity.allergens( Arrays.copyOf( allergens, allergens.length ) );
         }
-        foodEntity.servingSizeG( food.getServingSizeG() );
-        foodEntity.servingDescription( food.getServingDescription() );
+        foodEntity.barcode( food.getBarcode() );
+        foodEntity.brand( food.getBrand() );
+        foodEntity.carbohydratesG( food.getCarbohydratesG() );
+        foodEntity.energyKcal( food.getEnergyKcal() );
+        foodEntity.energyKj( food.getEnergyKj() );
+        foodEntity.externalId( food.getExternalId() );
+        foodEntity.fatTotalG( food.getFatTotalG() );
+        foodEntity.id( food.getId() );
         foodEntity.imageUrl( food.getImageUrl() );
-        foodEntity.active( food.isActive() );
-        foodEntity.verified( food.isVerified() );
+        foodEntity.ingredientsText( food.getIngredientsText() );
+        Map<String, BigDecimal> map = food.getMicronutrients();
+        if ( map != null ) {
+            foodEntity.micronutrients( new LinkedHashMap<String, BigDecimal>( map ) );
+        }
+        foodEntity.name( food.getName() );
+        foodEntity.ofWhichFiberG( food.getOfWhichFiberG() );
+        foodEntity.ofWhichSaturatedG( food.getOfWhichSaturatedG() );
+        foodEntity.ofWhichSugarsG( food.getOfWhichSugarsG() );
+        foodEntity.ofWhichTransG( food.getOfWhichTransG() );
+        foodEntity.proteinsG( food.getProteinsG() );
+        foodEntity.servingDescription( food.getServingDescription() );
+        foodEntity.servingSizeG( food.getServingSizeG() );
+        foodEntity.sodiumMg( food.getSodiumMg() );
         foodEntity.tenantId( food.getTenantId() );
+        foodEntity.verified( food.isVerified() );
 
         foodEntity.source( FoodEntity.FoodSource.valueOf(food.getSource().name()) );
         foodEntity.category( food.getCategory() != null ? FoodEntity.FoodCategory.valueOf(food.getCategory().name()) : null );
@@ -162,35 +162,35 @@ public class FoodMapperImpl implements FoodMapper {
 
         FoodResponse foodResponse = new FoodResponse();
 
-        foodResponse.setId( food.getId() );
-        foodResponse.setName( food.getName() );
-        foodResponse.setBrand( food.getBrand() );
-        foodResponse.setBarcode( food.getBarcode() );
-        foodResponse.setSource( food.getSource() );
-        foodResponse.setCategory( food.getCategory() );
-        foodResponse.setEnergyKcal( food.getEnergyKcal() );
-        foodResponse.setCarbohydratesG( food.getCarbohydratesG() );
-        foodResponse.setOfWhichSugarsG( food.getOfWhichSugarsG() );
-        foodResponse.setOfWhichFiberG( food.getOfWhichFiberG() );
-        foodResponse.setProteinsG( food.getProteinsG() );
-        foodResponse.setFatTotalG( food.getFatTotalG() );
-        foodResponse.setOfWhichSaturatedG( food.getOfWhichSaturatedG() );
-        foodResponse.setOfWhichTransG( food.getOfWhichTransG() );
-        foodResponse.setSodiumMg( food.getSodiumMg() );
-        Map<String, BigDecimal> map = food.getMicronutrients();
-        if ( map != null ) {
-            foodResponse.setMicronutrients( new LinkedHashMap<String, BigDecimal>( map ) );
-        }
-        foodResponse.setIngredientsText( food.getIngredientsText() );
         String[] allergens = food.getAllergens();
         if ( allergens != null ) {
             foodResponse.setAllergens( Arrays.copyOf( allergens, allergens.length ) );
         }
-        foodResponse.setServingSizeG( food.getServingSizeG() );
-        foodResponse.setServingDescription( food.getServingDescription() );
+        foodResponse.setBarcode( food.getBarcode() );
+        foodResponse.setBrand( food.getBrand() );
+        foodResponse.setCarbohydratesG( food.getCarbohydratesG() );
+        foodResponse.setCategory( food.getCategory() );
+        foodResponse.setEnergyKcal( food.getEnergyKcal() );
+        foodResponse.setFatTotalG( food.getFatTotalG() );
+        foodResponse.setId( food.getId() );
         foodResponse.setImageUrl( food.getImageUrl() );
-        foodResponse.setVerified( food.isVerified() );
+        foodResponse.setIngredientsText( food.getIngredientsText() );
         foodResponse.setMeasures( householdMeasureListToHouseholdMeasureResponseList( food.getMeasures() ) );
+        Map<String, BigDecimal> map = food.getMicronutrients();
+        if ( map != null ) {
+            foodResponse.setMicronutrients( new LinkedHashMap<String, BigDecimal>( map ) );
+        }
+        foodResponse.setName( food.getName() );
+        foodResponse.setOfWhichFiberG( food.getOfWhichFiberG() );
+        foodResponse.setOfWhichSaturatedG( food.getOfWhichSaturatedG() );
+        foodResponse.setOfWhichSugarsG( food.getOfWhichSugarsG() );
+        foodResponse.setOfWhichTransG( food.getOfWhichTransG() );
+        foodResponse.setProteinsG( food.getProteinsG() );
+        foodResponse.setServingDescription( food.getServingDescription() );
+        foodResponse.setServingSizeG( food.getServingSizeG() );
+        foodResponse.setSodiumMg( food.getSodiumMg() );
+        foodResponse.setSource( food.getSource() );
+        foodResponse.setVerified( food.isVerified() );
 
         return foodResponse;
     }
@@ -203,25 +203,25 @@ public class FoodMapperImpl implements FoodMapper {
 
         MacroResultResponse macroResultResponse = new MacroResultResponse();
 
-        macroResultResponse.setFoodId( macroResult.getFoodId() );
-        macroResultResponse.setFoodName( macroResult.getFoodName() );
         macroResultResponse.setBrand( macroResult.getBrand() );
         macroResultResponse.setCalculatedWeightG( macroResult.getCalculatedWeightG() );
-        macroResultResponse.setPortionDescription( macroResult.getPortionDescription() );
+        macroResultResponse.setCarbohydratesG( macroResult.getCarbohydratesG() );
         macroResultResponse.setEnergyKcal( macroResult.getEnergyKcal() );
         macroResultResponse.setEnergyKj( macroResult.getEnergyKj() );
-        macroResultResponse.setCarbohydratesG( macroResult.getCarbohydratesG() );
-        macroResultResponse.setOfWhichSugarsG( macroResult.getOfWhichSugarsG() );
-        macroResultResponse.setOfWhichFiberG( macroResult.getOfWhichFiberG() );
-        macroResultResponse.setProteinsG( macroResult.getProteinsG() );
         macroResultResponse.setFatTotalG( macroResult.getFatTotalG() );
-        macroResultResponse.setOfWhichSaturatedG( macroResult.getOfWhichSaturatedG() );
-        macroResultResponse.setOfWhichTransG( macroResult.getOfWhichTransG() );
-        macroResultResponse.setSodiumMg( macroResult.getSodiumMg() );
+        macroResultResponse.setFoodId( macroResult.getFoodId() );
+        macroResultResponse.setFoodName( macroResult.getFoodName() );
         Map<String, BigDecimal> map = macroResult.getMicronutrients();
         if ( map != null ) {
             macroResultResponse.setMicronutrients( new LinkedHashMap<String, BigDecimal>( map ) );
         }
+        macroResultResponse.setOfWhichFiberG( macroResult.getOfWhichFiberG() );
+        macroResultResponse.setOfWhichSaturatedG( macroResult.getOfWhichSaturatedG() );
+        macroResultResponse.setOfWhichSugarsG( macroResult.getOfWhichSugarsG() );
+        macroResultResponse.setOfWhichTransG( macroResult.getOfWhichTransG() );
+        macroResultResponse.setPortionDescription( macroResult.getPortionDescription() );
+        macroResultResponse.setProteinsG( macroResult.getProteinsG() );
+        macroResultResponse.setSodiumMg( macroResult.getSodiumMg() );
 
         return macroResultResponse;
     }
@@ -270,22 +270,22 @@ public class FoodMapperImpl implements FoodMapper {
 
         Food.FoodBuilder food = Food.builder();
 
-        food.name( request.getName() );
-        food.brand( request.getBrand() );
         food.barcode( request.getBarcode() );
+        food.brand( request.getBrand() );
+        food.carbohydratesG( request.getCarbohydratesG() );
         food.category( request.getCategory() );
         food.energyKcal( request.getEnergyKcal() );
-        food.carbohydratesG( request.getCarbohydratesG() );
-        food.ofWhichSugarsG( request.getOfWhichSugarsG() );
-        food.ofWhichFiberG( request.getOfWhichFiberG() );
-        food.proteinsG( request.getProteinsG() );
         food.fatTotalG( request.getFatTotalG() );
-        food.ofWhichSaturatedG( request.getOfWhichSaturatedG() );
-        food.sodiumMg( request.getSodiumMg() );
-        food.ingredientsText( request.getIngredientsText() );
-        food.servingSizeG( request.getServingSizeG() );
-        food.servingDescription( request.getServingDescription() );
         food.imageUrl( request.getImageUrl() );
+        food.ingredientsText( request.getIngredientsText() );
+        food.name( request.getName() );
+        food.ofWhichFiberG( request.getOfWhichFiberG() );
+        food.ofWhichSaturatedG( request.getOfWhichSaturatedG() );
+        food.ofWhichSugarsG( request.getOfWhichSugarsG() );
+        food.proteinsG( request.getProteinsG() );
+        food.servingDescription( request.getServingDescription() );
+        food.servingSizeG( request.getServingSizeG() );
+        food.sodiumMg( request.getSodiumMg() );
         food.tenantId( request.getTenantId() );
 
         food.source( Food.FoodSource.CUSTOM );
@@ -305,11 +305,11 @@ public class FoodMapperImpl implements FoodMapper {
 
         FoodResponse.HouseholdMeasureResponse householdMeasureResponse = new FoodResponse.HouseholdMeasureResponse();
 
+        householdMeasureResponse.setDefaultMeasure( householdMeasure.isDefaultMeasure() );
         householdMeasureResponse.setId( householdMeasure.getId() );
         householdMeasureResponse.setName( householdMeasure.getName() );
         householdMeasureResponse.setQuantity( householdMeasure.getQuantity() );
         householdMeasureResponse.setWeightG( householdMeasure.getWeightG() );
-        householdMeasureResponse.setDefaultMeasure( householdMeasure.isDefaultMeasure() );
 
         return householdMeasureResponse;
     }
