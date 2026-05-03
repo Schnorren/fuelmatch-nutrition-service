@@ -2,7 +2,6 @@ package com.fuelmatch.nutrition.infrastructure.integration.taco;
 
 import com.fuelmatch.nutrition.application.port.FoodRepository;
 import com.fuelmatch.nutrition.domain.model.Food;
-import com.fuelmatch.nutrition.domain.model.HouseholdMeasure;
 import com.fuelmatch.nutrition.infrastructure.persistence.entity.FoodEntity;
 import com.fuelmatch.nutrition.infrastructure.persistence.entity.FoodImportLogEntity;
 import com.fuelmatch.nutrition.infrastructure.persistence.repository.FoodImportLogJpaRepository;
@@ -11,28 +10,29 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
- * Serviço de importação batch da Tabela TACO a partir de arquivo CSV.
+ * Serviço de importação completa da Tabela TACO 4ª Edição.
  *
- * <p><b>Formato esperado do CSV</b> (com header):
+ * <p>Espera o CSV limpo gerado pelo script {@code convert_taco_csv.py} em:
+ * {@code src/main/resources/taco/taco_4ed.csv}
+ *
+ * <p>Formato do CSV (com header):
  * <pre>
- * id,name,category,energy_kcal,energy_kj,carbs,fiber,sugars,protein,fat,saturated,sodium
- * 1,Arroz branco cozido,CEREAIS_GRAOS,128,537,28.1,1.6,,2.5,0.2,0.1,1
+ * taco_id,name,category,energy_kcal,energy_kj,proteins_g,fat_total_g,
+ * carbohydrates_g,fiber_g,cholesterol_mg,ash_g,calcium_mg,magnesium_mg,
+ * manganese_mg,phosphorus_mg,iron_mg,sodium_mg,potassium_mg,copper_mg,
+ * zinc_mg,retinol_mcg,re_mcg,rae_mcg,thiamine_mg,riboflavin_mg,
+ * pyridoxine_mg,niacin_mg,vitamin_c_mg
  * </pre>
  *
- * <p>O CSV da TACO completo (≈ 597 alimentos) pode ser obtido em:
- * {@code https://www.cfn.org.br/wp-content/uploads/2017/03/taco_4_edicao_ampliada_e_revisada.pdf}
- * e convertido para CSV via scripts de ETL.
- *
- * <p>Coloque o arquivo em {@code src/main/resources/taco/taco_4ed.csv}.
+ * <p>Micronutrientes são armazenados no campo JSONB {@code micronutrients}
+ * da entidade {@link com.fuelmatch.nutrition.infrastructure.persistence.entity.FoodEntity}.
+ * Macros principais ficam nas colunas dedicadas.
  */
 @Service
 @RequiredArgsConstructor
@@ -40,24 +40,24 @@ import java.util.*;
 public class TacoImportService {
 
     private static final String TACO_CSV_PATH = "/taco/taco_4ed.csv";
-    private static final String TACO_SOURCE = "TACO";
 
     private final FoodRepository foodRepository;
     private final FoodImportLogJpaRepository importLogRepository;
 
     /**
      * Importa todos os alimentos do CSV da TACO.
-     * Idempotente: alimentos já existentes (por external_id) são ignorados.
+     * Operação idempotente — alimentos já existentes são ignorados.
      *
      * @return estatísticas da importação
      */
     @Transactional
     public ImportResult importFromCsv() {
-        log.info("Iniciando importação da Tabela TACO...");
+        log.info("Iniciando importação completa da Tabela TACO...");
 
         InputStream is = getClass().getResourceAsStream(TACO_CSV_PATH);
         if (is == null) {
-            log.warn("Arquivo TACO não encontrado em {}. Pulando importação.", TACO_CSV_PATH);
+            log.warn("Arquivo TACO não encontrado em {}.", TACO_CSV_PATH);
+            log.warn("Coloque o arquivo em src/main/resources/taco/taco_4ed.csv");
             return ImportResult.empty();
         }
 
@@ -73,19 +73,24 @@ public class TacoImportService {
             while ((line = reader.readLine()) != null) {
                 if (line.isBlank()) continue;
                 total++;
+
                 String[] cols = parseCsvLine(line);
+                if (cols.length < 28) {
+                    log.warn("Linha com colunas insuficientes ({}): {}", cols.length, line);
+                    failed++;
+                    continue;
+                }
+
+                String externalId = "TACO-" + cols[0].trim();
 
                 try {
-                    String externalId = "TACO-" + cols[0].trim();
-
-                    // Idempotência
                     if (foodRepository.existsBySourceAndExternalId(
                             Food.FoodSource.TACO, externalId)) {
                         skipped++;
                         continue;
                     }
 
-                    Food food = buildFoodFromCsv(cols, externalId);
+                    Food food = buildFood(cols, externalId);
                     Food savedFood = foodRepository.save(food);
 
                     importLogRepository.save(FoodImportLogEntity.success(
@@ -94,13 +99,15 @@ public class TacoImportService {
                             externalId));
                     saved++;
 
+                    if (saved % 50 == 0) {
+                        log.info("TACO import: {}/{} processados...", saved + skipped, total);
+                    }
+
                 } catch (Exception e) {
                     failed++;
-                    log.warn("Erro ao importar linha TACO '{}': {}", line, e.getMessage());
+                    log.warn("Erro ao importar '{}' ({}): {}", externalId, cols[1], e.getMessage());
                     importLogRepository.save(FoodImportLogEntity.failed(
-                            FoodEntity.FoodSource.TACO,
-                            cols.length > 0 ? "TACO-" + cols[0] : "unknown",
-                            e.getMessage()));
+                            FoodEntity.FoodSource.TACO, externalId, e.getMessage()));
                 }
             }
         } catch (IOException e) {
@@ -113,94 +120,125 @@ public class TacoImportService {
         return result;
     }
 
-    // ── CSV Parsing ───────────────────────────────────────────────────────────
+    // ── Builder ───────────────────────────────────────────────────────────────
 
-    private Food buildFoodFromCsv(String[] cols, String externalId) {
-        // Formato: id,name,category,energy_kcal,energy_kj,carbs,fiber,sugars,protein,fat,saturated,sodium
-        Food.FoodCategory category = parseCategory(safeGet(cols, 2));
+    private Food buildFood(String[] c, String externalId) {
+        // Macros principais (colunas dedicadas)
+        Food.FoodCategory category = parseCategory(c[2]);
+
+        // Micronutrientes → JSONB
+        Map<String, BigDecimal> micros = new LinkedHashMap<>();
+        putMicro(micros, "cholesterol_mg",   c[9]);
+        putMicro(micros, "ash_g",            c[10]);
+        putMicro(micros, "calcium_mg",       c[11]);
+        putMicro(micros, "magnesium_mg",     c[12]);
+        putMicro(micros, "manganese_mg",     c[13]);
+        putMicro(micros, "phosphorus_mg",    c[14]);
+        putMicro(micros, "iron_mg",          c[15]);
+        putMicro(micros, "potassium_mg",     c[17]);
+        putMicro(micros, "copper_mg",        c[18]);
+        putMicro(micros, "zinc_mg",          c[19]);
+        putMicro(micros, "retinol_mcg",      c[20]);
+        putMicro(micros, "re_mcg",           c[21]);
+        putMicro(micros, "rae_mcg",          c[22]);
+        putMicro(micros, "thiamine_mg",      c[23]);
+        putMicro(micros, "riboflavin_mg",    c[24]);
+        putMicro(micros, "pyridoxine_mg",    c[25]);
+        putMicro(micros, "niacin_mg",        c[26]);
+        putMicro(micros, "vitamin_c_mg",     c[27]);
 
         return Food.builder()
-                .name(safeGet(cols, 1).trim())
+                .name(c[1].trim())
                 .source(Food.FoodSource.TACO)
                 .externalId(externalId)
                 .category(category)
-                .energyKcal(parseBd(safeGet(cols, 3)))
-                .energyKj(parseBd(safeGet(cols, 4)))
-                .carbohydratesG(parseBd(safeGet(cols, 5)))
-                .ofWhichFiberG(parseBd(safeGet(cols, 6)))
-                .ofWhichSugarsG(parseBd(safeGet(cols, 7)))
-                .proteinsG(parseBd(safeGet(cols, 8)))
-                .fatTotalG(parseBd(safeGet(cols, 9)))
-                .ofWhichSaturatedG(parseBd(safeGet(cols, 10)))
-                .sodiumMg(parseBd(safeGet(cols, 11)))
-                .micronutrients(Map.of())
+                // Macros por 100g
+                .energyKcal(parseBd(c[3]))
+                .energyKj(parseBd(c[4]))
+                .proteinsG(parseBd(c[5]))
+                .fatTotalG(parseBd(c[6]))
+                .carbohydratesG(parseBd(c[7]))
+                .ofWhichFiberG(parseBd(c[8]))
+                // Sódio como coluna dedicada (relevante para dietas)
+                .sodiumMg(parseBd(c[16]))
+                // Micronutrientes completos no JSONB
+                .micronutrients(micros)
+                .allergens(new String[0])
                 .active(true)
-                .verified(true)   // TACO é fonte verificada
+                .verified(true)
                 .measures(List.of())
                 .build();
     }
 
+    private void putMicro(Map<String, BigDecimal> map, String key, String val) {
+        BigDecimal bd = parseBd(val);
+        if (bd != null) map.put(key, bd);
+    }
+
+    // ── Parsers ───────────────────────────────────────────────────────────────
+
     /**
-     * Parser CSV simples — suporta campos entre aspas com vírgulas internas.
+     * Parser CSV RFC-4180 simples — suporta campos entre aspas com vírgulas.
      */
     private String[] parseCsvLine(String line) {
-        List<String> result = new ArrayList<>();
+        List<String> fields = new ArrayList<>();
         boolean inQuotes = false;
         StringBuilder current = new StringBuilder();
 
-        for (char c : line.toCharArray()) {
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
             if (c == '"') {
-                inQuotes = !inQuotes;
+                if (inQuotes && i + 1 < line.length() && line.charAt(i + 1) == '"') {
+                    current.append('"');
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
             } else if (c == ',' && !inQuotes) {
-                result.add(current.toString());
+                fields.add(current.toString());
                 current.setLength(0);
             } else {
                 current.append(c);
             }
         }
-        result.add(current.toString());
-        return result.toArray(new String[0]);
+        fields.add(current.toString());
+        return fields.toArray(new String[0]);
     }
 
     private BigDecimal parseBd(String value) {
-        if (value == null || value.isBlank() || value.equalsIgnoreCase("NA")
-                || value.equalsIgnoreCase("*") || value.equals("-")) {
+        if (value == null) return null;
+        String v = value.trim();
+        if (v.isEmpty() || v.equalsIgnoreCase("NA") || v.equals("*")
+                || v.equals("-") || v.equalsIgnoreCase("Tr")
+                || v.equalsIgnoreCase("Tr.") || v.equalsIgnoreCase("ND")) {
             return null;
         }
         try {
-            return new BigDecimal(value.trim().replace(',', '.'));
+            return new BigDecimal(v.replace(',', '.'));
         } catch (NumberFormatException e) {
             return null;
         }
     }
 
-    private String safeGet(String[] cols, int index) {
-        return (index < cols.length) ? cols[index] : "";
-    }
-
     private Food.FoodCategory parseCategory(String raw) {
         if (raw == null || raw.isBlank()) return Food.FoodCategory.OUTROS;
         try {
-            return Food.FoodCategory.valueOf(
-                    raw.trim().toUpperCase()
-                       .replace(' ', '_')
-                       .replace('-', '_'));
+            return Food.FoodCategory.valueOf(raw.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
             return Food.FoodCategory.OUTROS;
         }
     }
 
-    // ── Result record ─────────────────────────────────────────────────────────
+    // ── Result ────────────────────────────────────────────────────────────────
 
     public record ImportResult(int total, int saved, int skipped, int failed) {
-        static ImportResult empty() {
-            return new ImportResult(0, 0, 0, 0);
-        }
+        static ImportResult empty() { return new ImportResult(0, 0, 0, 0); }
 
         @Override
         public String toString() {
-            return String.format("ImportResult{total=%d, saved=%d, skipped=%d, failed=%d}",
-                    total, saved, skipped, failed);
+            return String.format(
+                "ImportResult{total=%d, saved=%d, skipped=%d, failed=%d}",
+                total, saved, skipped, failed);
         }
     }
-}
+}  

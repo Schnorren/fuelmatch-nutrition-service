@@ -12,14 +12,14 @@ com/fuelmatch/nutrition/domain/model/MacroResult$MacroResultBuilder.class
 com/fuelmatch/nutrition/api/dto/response/MacroResultResponse.class
 com/fuelmatch/nutrition/application/service/MacroCalculatorService$PortionResolutionException.class
 com/fuelmatch/nutrition/application/service/MacroCalculatorService.class
-com/fuelmatch/nutrition/infrastructure/integration/taco/TacoImportService.class
 com/fuelmatch/nutrition/infrastructure/persistence/entity/FoodImportLogEntity$FoodImportLogEntityBuilder.class
+com/fuelmatch/nutrition/infrastructure/integration/taco/TacoImportService.class
 com/fuelmatch/nutrition/domain/model/Food$FoodBuilder.class
 com/fuelmatch/nutrition/application/mapper/FoodMapper.class
 com/fuelmatch/nutrition/api/advice/GlobalExceptionHandler.class
 com/fuelmatch/nutrition/infrastructure/persistence/entity/FoodSynonymEntity.class
-com/fuelmatch/nutrition/api/controller/FoodAdminController.class
 com/fuelmatch/nutrition/api/dto/request/BatchCalculateRequest$BatchItem.class
+com/fuelmatch/nutrition/api/controller/FoodAdminController.class
 com/fuelmatch/nutrition/infrastructure/persistence/entity/HouseholdMeasureEntity$HouseholdMeasureEntityBuilder.class
 com/fuelmatch/nutrition/infrastructure/persistence/entity/FoodEntity$FoodSource.class
 com/fuelmatch/nutrition/infrastructure/integration/taco/TacoImportService$ImportResult.class
@@ -32,8 +32,8 @@ com/fuelmatch/nutrition/infrastructure/persistence/entity/FoodImportLogEntity.cl
 com/fuelmatch/nutrition/api/controller/FoodController.class
 com/fuelmatch/nutrition/api/dto/request/CreateFoodRequest$HouseholdMeasureRequest.class
 com/fuelmatch/nutrition/api/dto/request/CalculateMacrosRequest.class
-com/fuelmatch/nutrition/infrastructure/integration/openfoodfacts/dto/OffProductResponse$OffProduct.class
 com/fuelmatch/nutrition/infrastructure/persistence/repository/FoodImportLogJpaRepository.class
+com/fuelmatch/nutrition/infrastructure/integration/openfoodfacts/dto/OffProductResponse$OffProduct.class
 com/fuelmatch/nutrition/api/dto/response/BatchCalculateResponse$BatchItemResult$BatchItemResultBuilder.class
 com/fuelmatch/nutrition/api/dto/response/BatchCalculateResponse$BatchItemResult.class
 com/fuelmatch/nutrition/domain/model/Food$FoodSource.class

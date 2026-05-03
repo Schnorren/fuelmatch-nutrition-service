@@ -1,4 +1,4 @@
-/mnt/c/Users/lucas/Downloads/fuelmatch-nutrition-service/fuelmatch-nutrition-service/src/test/java/com/fuelmatch/nutrition/api/controller/FoodControllerIntegrationTest.java
-/mnt/c/Users/lucas/Downloads/fuelmatch-nutrition-service/fuelmatch-nutrition-service/src/test/java/com/fuelmatch/nutrition/application/service/FoodSearchServiceTest.java
-/mnt/c/Users/lucas/Downloads/fuelmatch-nutrition-service/fuelmatch-nutrition-service/src/test/java/com/fuelmatch/nutrition/application/service/MacroAggregatorServiceTest.java
-/mnt/c/Users/lucas/Downloads/fuelmatch-nutrition-service/fuelmatch-nutrition-service/src/test/java/com/fuelmatch/nutrition/application/service/MacroCalculatorServiceTest.java
+/home/lucas_ubuntu/Workspace/fuelmatch-nutrition-service/src/test/java/com/fuelmatch/nutrition/api/controller/FoodControllerIntegrationTest.java
+/home/lucas_ubuntu/Workspace/fuelmatch-nutrition-service/src/test/java/com/fuelmatch/nutrition/application/service/FoodSearchServiceTest.java
+/home/lucas_ubuntu/Workspace/fuelmatch-nutrition-service/src/test/java/com/fuelmatch/nutrition/application/service/MacroAggregatorServiceTest.java
+/home/lucas_ubuntu/Workspace/fuelmatch-nutrition-service/src/test/java/com/fuelmatch/nutrition/application/service/MacroCalculatorServiceTest.java
