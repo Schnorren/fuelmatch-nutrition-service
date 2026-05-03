@@ -1,0 +1,123 @@
+spring:
+  application:
+    name: fuelmatch-nutrition-service
+
+  # ── Mvc & Web (Movido para cá para evitar duplicação) ───────────────────────
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+
+  # ── DataSource ──────────────────────────────────────────────────────────────
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/fuelmatch_nutrition}
+    username: ${DB_USER:nutrition}
+    password: ${DB_PASS:nutrition}
+    hikari:
+      pool-name: NutritionPool
+      maximum-pool-size: 20          # Ajustar conforme carga esperada
+      minimum-idle: 5
+      idle-timeout: 30000
+      connection-timeout: 5000
+      leak-detection-threshold: 60000
+      connection-test-query: SELECT 1
+
+  # ── JPA ─────────────────────────────────────────────────────────────────────
+  jpa:
+    hibernate:
+      ddl-auto: validate             # Flyway controla o schema
+    show-sql: false
+    open-in-view: false             # NUNCA true em produção
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_batch_fetch_size: 50
+        jdbc:
+          batch_size: 50
+          order_inserts: true
+          order_updates: true
+        query:
+          fail_on_pagination_over_collection_fetch: true
+
+  # ── Flyway ───────────────────────────────────────────────────────────────────
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+    validate-on-migrate: true
+
+  # ── Redis Cache ───────────────────────────────────────────────────────────────
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASS:}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
+
+  # ── Cache ─────────────────────────────────────────────────────────────────────
+  cache:
+    type: redis
+
+  # ── Async / Threads ───────────────────────────────────────────────────────────
+  task:
+    execution:
+      thread-name-prefix: async-
+      pool:
+        core-size: 4
+        max-size: 10
+
+# ── Integrações ──────────────────────────────────────────────────────────────
+integration:
+  open-food-facts:
+    base-url: ${OFF_BASE_URL:https://world.openfoodfacts.org}
+    timeout-seconds: ${OFF_TIMEOUT_SECONDS:5}
+    enabled: ${OFF_ENABLED:true}
+
+# ── Async Config ─────────────────────────────────────────────────────────────
+async:
+  off-persistence:
+    core-pool-size: 2
+    max-pool-size: 5
+    queue-capacity: 100
+
+# ── Actuator / Observabilidade ────────────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+# ── Server ────────────────────────────────────────────────────────────────────
+server:
+  port: ${PORT:8080}
+  shutdown: graceful
+  compression:
+    enabled: true
+    mime-types: application/json
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 20
+    accept-count: 100
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+logging:
+  level:
+    root: INFO
+    com.fuelmatch.nutrition: DEBUG
+    org.springframework.web: INFO
+    org.hibernate.SQL: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

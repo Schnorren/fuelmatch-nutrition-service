@@ -1,0 +1,61 @@
+version: '3.9'
+
+services:
+
+  # ── PostgreSQL 16 ──────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: fuelmatch-postgres
+    environment:
+      POSTGRES_DB: fuelmatch_nutrition
+      POSTGRES_USER: nutrition
+      POSTGRES_PASSWORD: nutrition
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nutrition -d fuelmatch_nutrition"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Redis 7 ────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: fuelmatch-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ── Microsserviço ─────────────────────────────────────────────────────────
+  nutrition-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fuelmatch-nutrition-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/fuelmatch_nutrition
+      DB_USER: nutrition
+      DB_PASS: nutrition
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      OFF_ENABLED: "true"
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
